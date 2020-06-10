@@ -18,7 +18,7 @@ class ReportDataDevelop {
   int flush_data(unsigned char *rx_data);
   void print_data(void);
 
- private:
+//  private:
   int runing_;
   int mode_;
   int cmdnum_;

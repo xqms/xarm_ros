@@ -26,25 +26,18 @@ class XarmRTConnection
         void thread_run(void)
         {
             int ret;
-            int err_num;
-            int rxcnt;
+            int err_num = 0;
+            int rxcnt = 0;
             int i;
-            int first_cycle = 1;
-            double d, prev_angle[joint_num_];
+            bool first_cycle = true;
+            double prev_angle[joint_num_];
 
-            ros::Rate r(REPORT_RATE_HZ); // 50Hz
+            ros::Rate r(200.0);
 
-            while(true)
+            for(;; r.sleep())
             {
-                // usleep(5000);
-                ret = xarm_driver.get_frame();
-                if (ret != 0) continue;
-
-                ret = xarm_driver.get_rich_data(norm_data);
-                if (ret == 0)
+                if(xarm_driver.get_devel_frame() == 0 && xarm_driver.get_devel_data(develop_data) == 0)
                 {
-                    rxcnt++;
-
                     now = ros::Time::now();
                     js_msg.header.stamp = now;
                     js_msg.header.frame_id = "real-time data";
@@ -54,26 +47,37 @@ class XarmRTConnection
                     js_msg.effort.resize(joint_num_);
                     for(i = 0; i < joint_num_; i++)
                     {
-                        d = (double)norm_data.angle_[i];
                         js_msg.name[i] = joint_name_[i];
-                        js_msg.position[i] = d;
+                        js_msg.position[i] = develop_data.angle_[i];
 
                         if (first_cycle)
                         {
                             js_msg.velocity[i] = 0;
-                            first_cycle = 0;
+                            first_cycle = false;
                         }
                         else
                         {
-                            js_msg.velocity[i] = (js_msg.position[i] - prev_angle[i])*REPORT_RATE_HZ;
+                            js_msg.velocity[i] = (js_msg.position[i] - prev_angle[i]) / (now - last_feedback_stamp_).toSec();
                         }
 
                         js_msg.effort[i] = 0;
 
-                        prev_angle[i] = d;
+                        prev_angle[i] = develop_data.angle_[i];
                     }
-                    
+
+                    last_feedback_stamp_ = now;
+
                     xarm_driver.pub_joint_state(js_msg);
+                }
+
+                // usleep(5000);
+                ret = xarm_driver.get_frame();
+                if (ret != 0) continue;
+
+                ret = xarm_driver.get_rich_data(norm_data);
+                if (ret == 0)
+                {
+                    rxcnt++;
 
                     rm_msg.state = norm_data.runing_;
                     rm_msg.mode = norm_data.mode_;
@@ -110,8 +114,6 @@ class XarmRTConnection
                     printf("Error: real_data.flush_data failed, ret = %d\n", ret);
                     err_num++;
                 }
-
-                r.sleep();
             }
         }
 
@@ -119,6 +121,7 @@ class XarmRTConnection
         {
             XarmRTConnection* pThreadTest=(XarmRTConnection*)arg;
             pThreadTest->thread_run();
+            return nullptr;
         }
 
     public:
@@ -126,10 +129,14 @@ class XarmRTConnection
         char *ip;
         ros::Time now;
         SocketPort *arm_report;
+        SocketPort *arm_devel_report;
         ReportDataNorm norm_data;
+        ReportDataDevelop develop_data;
         sensor_msgs::JointState js_msg;
         xarm_api::XARMDriver xarm_driver;
         xarm_msgs::RobotMsg rm_msg;
+
+        ros::Time last_feedback_stamp_;
 
         int joint_num_;
         std::vector<std::string> joint_name_;

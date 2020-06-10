@@ -208,7 +208,7 @@ int ReportDataRich::flush_data(unsigned char *rx_data) {
   rot_jerk_ = rot_msg_[0];
   rot_accmax_ = rot_msg_[1];
 
-  for (int i = 0; i < 17; i++) { sv3msg_[i] = data_fp[229 + i]; }
+  for (int i = 0; i < 16; i++) { sv3msg_[i] = data_fp[229 + i]; }
 
   return 0;
 }

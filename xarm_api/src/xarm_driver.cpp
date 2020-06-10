@@ -555,6 +555,21 @@ namespace xarm_api
         return ret;
     }
 
+    int XARMDriver::get_devel_frame(void)
+    {
+        int ret;
+        ret = arm_devel_report_->read_frame(rx_devel_data_);
+        return ret;
+    }
+
+    int XARMDriver::get_devel_data(ReportDataDevelop &devel_data)
+    {
+        int ret;
+        ret = devel_data_.flush_data(rx_devel_data_);
+        devel_data = devel_data_;
+        return ret;
+    }
+
     int XARMDriver::wait_for_finish()
     {
         bool wait;

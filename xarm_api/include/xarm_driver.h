@@ -63,11 +63,21 @@ namespace xarm_api
             int get_frame(void);
             int get_rich_data(ReportDataNorm &norm_data);
 
+            int get_devel_frame(void);
+            int get_devel_data(ReportDataDevelop& devel_data);
+
         private:
             SocketPort *arm_report_;
             ReportDataNorm norm_data_;
+
+            SocketPort *arm_devel_report_;
+            ReportDataDevelop devel_data_;
+
+            ros::Time last_feedback_stamp_;
+
             UxbusCmd *arm_cmd_;
             unsigned char rx_data_[1280];
+            unsigned char rx_devel_data_[1280];
             std::string ip;
             pthread_t thread_id_;
             ros::AsyncSpinner spinner;
