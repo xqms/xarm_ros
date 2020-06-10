@@ -66,7 +66,8 @@ namespace xarm_api
         robot_rt_state_ = nh_.advertise<xarm_msgs::RobotMsg>("xarm_states", 10, true);
         // end_input_state_ = nh_.advertise<xarm_msgs::IOState>("xarm_input_states", 10, true);
         
-        nh_.getParam("DOF",dof_);
+        if(!nh_.getParam("DOF",dof_))
+            throw std::runtime_error("need DOF parameter");
 
         arm_report_ = connext_tcp_report_norm(server_ip);
         // ReportDataNorm norm_data_;
