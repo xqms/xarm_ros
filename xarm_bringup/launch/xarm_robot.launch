@@ -3,7 +3,7 @@
 	<arg name="publish_tf" default="true" />
 	<arg name="hw_ns" default="xarm" />
     
-	<param name = "$(arg hw_ns)/xarm_robot_ip" type="str" value = "$(arg robot_ip)"/>
+	<param ns="$(arg hw_ns)" name="xarm_robot_ip" type="str" value = "$(arg robot_ip)"/>
 
     <node name="robot_state_publisher" if="$(arg publish_tf)" pkg="robot_state_publisher" type="state_publisher" />
 
