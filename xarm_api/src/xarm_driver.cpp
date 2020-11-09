@@ -70,6 +70,7 @@ namespace xarm_api
             throw std::runtime_error("need DOF parameter");
 
         arm_report_ = connext_tcp_report_norm(server_ip);
+        arm_devel_report_ = connext_tcp_report_devl(server_ip);
         // ReportDataNorm norm_data_;
         arm_cmd_ = connect_tcp_control(server_ip);  
         if (arm_cmd_ == NULL)

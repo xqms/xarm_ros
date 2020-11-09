@@ -38,6 +38,8 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
   else
   { bus_flag -= 1; }
 
+  print_hex("recv:", data_fp, 8);
+
   if (num != bus_flag) { /*fprintf(stderr, "expect flag: %d, recv: %d\n", bus_flag, num);*/ return UXBUS_STATE::ERR_NUM; }
   if (prot != TX2_PROT_CON_) { return UXBUS_STATE::ERR_PROT; }
   if (fun != funcode) { /*fprintf(stderr, "expect funcode: %d, recv: %d\n", funcode, fun);*/ return UXBUS_STATE::ERR_FUN; }
@@ -81,7 +83,7 @@ int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {
 
   for (int i = 0; i < num; i++) { send_data[7 + i] = datas[i]; }
   arm_port_->flush();
-  // print_hex("send:", send_data, num + 7);
+  print_hex("send:", send_data, num + 7);
   int ret = arm_port_->write_frame(send_data, len);
   if (ret != len) { return -1; }
 
